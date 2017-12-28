@@ -30,5 +30,32 @@ RUN \
   apt-get install sbt && \
   sbt sbtVersion
 
+
+# INSTALL DOCKER
+
+# Uninstall old versions of docker
+RUN apt-get remove docker docker.io
+
+# Run updates
+RUN \
+  apt-get update && \
+  apt-get install -y apt-transport-https ca-certificates curl gnupg2 software-properties-common
+
+# Add docker's official GPG key
+RUN curl -fsSL https://download.docker.com/linux/$(. /etc/os-release; echo "$ID")/gpg | apt-key add -
+RUN apt-key fingerprint 0EBFCD88
+
+# Use the stabale repositor 
+RUN add-apt-repository \
+   "deb [arch=amd64] https://download.docker.com/linux/$(. /etc/os-release; echo "$ID") \
+   $(lsb_release -cs) \
+   stable"
+
+# Install docker CE
+RUN \
+  apt-get update && \
+  apt-get install -y docker-ce
+
+
 # Define working directory
 WORKDIR /root

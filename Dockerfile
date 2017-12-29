@@ -56,6 +56,9 @@ RUN \
   apt-get update && \
   apt-get install -y docker-ce
 
+# Start the docker service
+RUN service docker start
+
 
 # Define working directory
 WORKDIR /root

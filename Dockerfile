@@ -5,59 +5,49 @@
 #
 
 # Pull base image
-FROM openjdk:8u151
+FROM openjdk:8u151-alpine
 
 # Env variables
 ENV SCALA_VERSION 2.12.4
-ENV SBT_VERSION 0.13.16
+ENV SCALA_HOME /usr/share/scala
+ENV PATH ${PATH}:${SCALA_HOME}/bin
 
-# Scala expects this file
-RUN touch /usr/lib/jvm/java-8-openjdk-amd64/release
+ENV SBT_VERSION 0.13.15
+ENV SBT_HOME /usr/local/sbt
+ENV PATH ${PATH}:${SBT_HOME}/bin
+
+RUN cd /tmp && \
+    apk upgrade --update && \
+    apk add --no-cache --virtual=build-dependencies ca-certificates wget curl tar gzip && \
+    apk add --no-cache --update bash
 
 # Install Scala
-## Piping curl directly in tar
-RUN \
-  curl -fsL https://downloads.typesafe.com/scala/$SCALA_VERSION/scala-$SCALA_VERSION.tgz | tar xfz - -C /root/ && \
-  echo >> /root/.bashrc && \
-  echo "export PATH=~/scala-$SCALA_VERSION/bin:$PATH" >> /root/.bashrc
+RUN mkdir -p ${SBT_HOME} && \
+    mkdir -p ${SCALA_HOME} && \
+    cd /root
+    
+ENV SCALA_TAR http://downloads.typesafe.com/scala/$SCALA_VERSION/scala-$SCALA_VERSION.tgz
+RUN apk --update add bash wget curl tar git && \
+    wget $SCALA_TAR -O scala-$SCALA_VERSION.tgz && \
+    tar -xf scala-$SCALA_VERSION.tgz && \
+    mv "scala-${SCALA_VERSION}/bin" "scala-${SCALA_VERSION}/lib" "${SCALA_HOME}" && \
+    echo -ne "- with scala $SCALA_VERSION\n" >> /root/.built && \
+    scala -version && \
+    rm scala-$SCALA_VERSION.tgz
 
-# Install sbt
-RUN \
-  curl -L -o sbt-$SBT_VERSION.deb https://dl.bintray.com/sbt/debian/sbt-$SBT_VERSION.deb && \
-  dpkg -i sbt-$SBT_VERSION.deb && \
-  rm sbt-$SBT_VERSION.deb && \
-  apt-get update && \
-  apt-get install sbt && \
-  sbt sbtVersion
-
+# Install SBT
+ENV SBT_TAR https://github.com/sbt/sbt/releases/download/v$SBT_VERSION/sbt-$SBT_VERSION.tgz
+RUN wget $SBT_TAR -O sbt-$SBT_VERSION.tgz && \
+    tar -xf sbt-$SBT_VERSION.tgz -C /usr/local && \
+    echo -ne "- with sbt sbt-$SBT_VERSION\n" >> /root/.built && \
+    rm sbt-$SBT_VERSION.tgz && \
+    sbt sbt-version && \
+    apk del wget tar && \
+    rm -rf /var/cache/apk/*
 
 # INSTALL DOCKER
-
-# Uninstall old versions of docker
-RUN apt-get remove docker docker.io
-
-# Run updates
-RUN \
-  apt-get update && \
-  apt-get install -y apt-transport-https ca-certificates curl gnupg2 software-properties-common
-
-# Add docker's official GPG key
-RUN curl -fsSL https://download.docker.com/linux/$(. /etc/os-release; echo "$ID")/gpg | apt-key add -
-RUN apt-key fingerprint 0EBFCD88
-
-# Use the stabale repositor 
-RUN add-apt-repository \
-   "deb [arch=amd64] https://download.docker.com/linux/$(. /etc/os-release; echo "$ID") \
-   $(lsb_release -cs) \
-   stable"
-
-# Install docker CE
-RUN \
-  apt-get update && \
-  apt-get install -y docker-ce
-
-# Start the docker service
-RUN service docker start
+RUN apk update && \
+    apk add docker
 
 
 # Define working directory

@@ -8,7 +8,7 @@
 FROM openjdk:8u171-alpine3.8
 
 # Env variables
-ENV SCALA_VERSION 2.12.6
+ENV SCALA_VERSION 2.12.10
 ENV SCALA_HOME /usr/share/scala
 ENV PATH ${PATH}:${SCALA_HOME}/bin
 

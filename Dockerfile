@@ -5,7 +5,7 @@
 #
 
 # Pull base image
-FROM amazoncorretto:11.0.9-alpine
+FROM amazoncorretto:11.0.11-alpine
 
 # Env variables
 ENV SCALA_VERSION 2.13.5

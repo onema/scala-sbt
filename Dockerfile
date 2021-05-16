@@ -5,7 +5,7 @@
 #
 
 # Pull base image
-FROM openjdk:8u171-alpine3.8
+FROM amazoncorretto:11.0.9-alpine
 
 # Env variables
 ENV SCALA_VERSION 2.13.5

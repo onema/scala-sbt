@@ -8,11 +8,11 @@
 FROM openjdk:8u171-alpine3.8
 
 # Env variables
-ENV SCALA_VERSION 2.12.10
+ENV SCALA_VERSION 2.13.5
 ENV SCALA_HOME /usr/share/scala
 ENV PATH ${PATH}:${SCALA_HOME}/bin
 
-ENV SBT_VERSION 1.2.1
+ENV SBT_VERSION 1.5.2
 ENV SBT_HOME /usr/local/sbt
 ENV PATH ${PATH}:${SBT_HOME}/bin
 
@@ -45,7 +45,7 @@ RUN wget $SBT_TAR -O sbt-$SBT_VERSION.tgz && \
     tar -xf sbt-$SBT_VERSION.tgz -C /usr/local && \
     echo -ne "- with sbt sbt-$SBT_VERSION\n" >> /root/.built && \
     rm sbt-$SBT_VERSION.tgz && \
-    sbt sbtVersion && \
+#    sbt sbtVersion && \
     apk del wget tar && \
     rm -rf /var/cache/apk/*
 
